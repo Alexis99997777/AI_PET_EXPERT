@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Pet Agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chat-bubble {
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .chat-container::-webkit-scrollbar-thumb {
+            background-color: #9ca3af;
+            border-radius: 4px;
+        }
+        .quick-action-btn {
+            @apply text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-1 px-3 rounded-full transition-colors duration-200;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+    <div class="w-full max-w-2xl h-full md:h-[90vh] flex flex-col bg-white rounded-lg shadow-xl border border-gray-200">
+        <!-- Header -->
+        <div class="bg-gray-800 text-white p-4 rounded-t-lg flex items-center shadow-md">
+            <svg class="w-8 h-8 mr-3 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v1.586m-6.854.421l1.13 1.13m9.448-1.13l-1.13 1.13M6.253 12l1.586 0M16.16 12l1.586 0M6.854 17.147l1.13-1.13M17.748 16.018l-1.13-1.13M12 21.747v-1.586M4.252 8.498a7.5 7.5 0 0115.496 0c0 1.594-.582 3.06-1.556 4.153l-3.21 3.21a1.5 1.5 0 01-2.122 0l-3.21-3.21A7.472 7.472 0 014.252 8.498z"></path></svg>
+            <h1 class="text-xl font-bold">AI Pet Expert</h1>
+        </div>
+
+        <!-- Chat Messages -->
+        <div id="chat-container" class="flex-1 p-6 overflow-y-auto chat-container">
+            <!-- Messages will be appended here -->
+             <div class="flex justify-start mb-4">
+                <div class="chat-bubble bg-gray-200 text-gray-800 rounded-lg py-2 px-4">
+                    <p class="text-sm">Hello! I'm here to help you care for your furry, feathered, or scaled family member.  Try asking something like, 'What's the best food for a white cat?' or 'How can I stop my puppy from chewing everything?' You can also use the camera to check if a snack is safe!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message Input -->
+        <div class="p-4 bg-white border-t border-gray-200 rounded-b-lg">
+             <div id="loading-spinner" class="hidden flex flex-col items-center justify-center mb-2 space-y-2">
+                <svg class="w-16 h-16 text-yellow-500 animate-bounce" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                <p class="text-sm text-gray-600 font-medium">Pawsitive AI is fetching the best advice...</p>
+            </div>
+            <div class="flex items-center">
+                <input type="file" id="image-upload" class="hidden" accept="image/*">
+                <input type="file" id="pdf-upload" class="hidden" accept=".pdf">
+                <button id="upload-btn" class="mr-2 text-gray-500 hover:text-yellow-600 p-2 rounded-full transition duration-300" title="Upload Image">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </button>
+                <button id="pdf-upload-btn" class="mr-2 text-gray-500 hover:text-yellow-600 p-2 rounded-full transition duration-300" title="Upload PDF">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </button>
+                <input type="text" id="user-input" class="w-full px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-500" placeholder="Ask a question about your pet...">
+                <button id="send-btn" class="ml-3 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-5 rounded-full transition duration-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </button>
+            </div>
+            <div class="mt-3 flex flex-wrap justify-center gap-2">
+                <button class="quick-action-btn" data-prompt="Generate a 7-day meal plan for my pet. Details: [describe your pet here]">✨ Generate Meal Plan</button>
+                <button class="quick-action-btn" data-prompt="Create a simple training plan to teach my pet to [describe a command]. Details: [describe your pet here]">✨ Create Training Plan</button>
+                <button id="clear-conversation-btn" class="quick-action-btn bg-red-100 hover:bg-red-200 text-red-700" title="Clear conversation history">🗑️ Clear Chat</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Conversation persistence using localStorage
+        const CONVERSATION_KEY = 'ai_pet_agent_conversation';
+        
+        // Save conversation to localStorage
+        function saveConversation() {
+            const messages = Array.from(chatContainer.children).map(messageDiv => {
+                const bubbleDiv = messageDiv.querySelector('.chat-bubble');
+                const sender = messageDiv.classList.contains('justify-end') ? 'user' : 'ai';
+                const type = bubbleDiv.querySelector('img') ? 'image' : 'text';
+                const content = type === 'image' ? 
+                    bubbleDiv.querySelector('img').src : 
+                    bubbleDiv.querySelector('p').innerHTML;
+                return { sender, type, content };
+            });
+            localStorage.setItem(CONVERSATION_KEY, JSON.stringify(messages));
+        }
+        
+        // Load conversation from localStorage
+        function loadConversation() {
+            const savedMessages = localStorage.getItem(CONVERSATION_KEY);
+            if (savedMessages) {
+                try {
+                    const messages = JSON.parse(savedMessages);
+                    // Clear existing messages except the welcome message
+                    chatContainer.innerHTML = '';
+                    // Restore all messages
+                    messages.forEach(msg => {
+                        addMessage(msg.content, msg.sender, msg.type);
+                    });
+                } catch (error) {
+                    console.error('Error loading conversation:', error);
+                    localStorage.removeItem(CONVERSATION_KEY);
+                }
+            }
+        }
+        
+        // Clear conversation from localStorage
+        function clearConversation() {
+            localStorage.removeItem(CONVERSATION_KEY);
+            chatContainer.innerHTML = `
+                <div class="flex justify-start mb-4">
+                    <div class="chat-bubble bg-gray-200 text-gray-800 rounded-lg py-2 px-4">
+                        <p class="text-sm">Hello! I'm here to help you care for your furry, feathered, or scaled family member. Try asking something like, 'What's the best food for a white cat?' or 'How can I stop my puppy from chewing everything?' You can also use the camera to check if a snack is safe!</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        const sendBtn = document.getElementById('send-btn');
+        const userInput = document.getElementById('user-input');
+        const chatContainer = document.getElementById('chat-container');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const uploadBtn = document.getElementById('upload-btn');
+        const imageUpload = document.getElementById('image-upload');
+        const pdfUploadBtn = document.getElementById('pdf-upload-btn');
+        const pdfUpload = document.getElementById('pdf-upload');
+
+        const API_KEY = "AIzaSyCiQfaluNIJx1S7ijbBoTumNwsWXiB4bfQ"; // LEAVE THIS EMPTY. Canvas will provide it.
+
+        sendBtn.addEventListener('click', handleUserMessage);
+        userInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') handleUserMessage();
+        });
+        
+        uploadBtn.addEventListener('click', () => imageUpload.click());
+        imageUpload.addEventListener('change', handleImageUpload);
+        
+        pdfUploadBtn.addEventListener('click', () => pdfUpload.click());
+        pdfUpload.addEventListener('change', handlePdfUpload);
+
+        // Initialize event listeners when DOM is ready
+        function initializeEventListeners() {
+            document.querySelectorAll('.quick-action-btn').forEach(button => {
+                if (button.id === 'clear-conversation-btn') {
+                    button.addEventListener('click', () => {
+                        if (confirm('Are you sure you want to clear the conversation? This action cannot be undone.')) {
+                            clearConversation();
+                        }
+                    });
+                } else {
+                    button.addEventListener('click', () => {
+                        userInput.value = button.dataset.prompt;
+                        userInput.focus();
+                        // Trigger the message handling to show loading state
+                        handleUserMessage();
+                    });
+                }
+            });
+        }
+        
+        // Load conversation when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadConversation();
+            initializeEventListeners();
+        });
+
+        function addMessage(content, sender, type = 'text') {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('flex', 'mb-4');
+
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.classList.add('chat-bubble', 'rounded-lg', 'py-2', 'px-4');
+
+            if (sender === 'user') {
+                messageDiv.classList.add('justify-end');
+                bubbleDiv.classList.add('bg-yellow-500', 'text-white');
+            } else { // 'ai'
+                messageDiv.classList.add('justify-start');
+                bubbleDiv.classList.add('bg-gray-200', 'text-gray-800');
+            }
+            
+            if (type === 'text') {
+                // Regex to find URLs and make them clickable
+                const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+
+                // Process the AI's response for better formatting
+                const formattedMessage = content
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Handle bolding
+                    .replace(/\n/g, '<br>') // Convert newlines to HTML line breaks
+                    .replace(urlRegex, '<a href="$1" target="_blank" class="text-blue-600 hover:underline">$1</a>'); // Make links clickable
+
+                bubbleDiv.innerHTML = `<p class="text-sm">${formattedMessage}</p>`;
+            } else if (type === 'image') {
+                bubbleDiv.innerHTML = `<img src="${content}" alt="User uploaded image" class="rounded-lg max-w-xs">`;
+                bubbleDiv.classList.remove('py-2', 'px-4'); 
+            }
+            
+            messageDiv.appendChild(bubbleDiv);
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // Save conversation after adding message
+            saveConversation();
+        }
+
+        async function handleUserMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            addMessage(message, 'user');
+            userInput.value = '';
+            showLoading(true);
+
+            try {
+                // All user text input now goes directly to the Gemini text model.
+                await callGeminiAPI(message);
+            } catch (error) {
+                console.error("Error handling user message:", error);
+                addMessage("Sorry, I encountered an error. Please try again.", "ai");
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                const base64Image = await toBase64(file);
+                addMessage(base64Image, 'user', 'image');
+                showLoading(true);
+                
+                const prompt = "Analyze this image. Is this food safe for a dog to eat? Explain why or why not, and mention any specific risks like toxicity, choking hazards, or high-fat content. If it is safe, specify if it should only be given in moderation.";
+                
+                await callGeminiVisionAPI(prompt, base64Image);
+
+            } catch (error) {
+                console.error("Error processing image or calling Vision API:", error);
+                addMessage("Sorry, I couldn't analyze that image. Please try another one.", 'ai');
+            } finally {
+                showLoading(false);
+                imageUpload.value = ''; // Reset file input
+            }
+        }
+
+        async function handlePdfUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                addMessage("PDF file is too large. Please upload a file smaller than 10MB.", 'ai');
+                pdfUpload.value = '';
+                return;
+            }
+
+            try {
+                const base64Pdf = await toBase64(file);
+                addMessage(`📄 Uploaded PDF: ${file.name}`, 'user', 'text');
+                showLoading(true);
+                
+                const prompt = `Analyze this PDF document. Please extract and summarize the key information about pet care, veterinary advice, feeding guidelines, or any other pet-related content. If this appears to be a veterinary record, medical document, or pet care guide, provide a detailed summary of the important information that would be helpful for pet owners. Focus on actionable advice and important details.`;
+                
+                await callGeminiVisionAPI(prompt, base64Pdf);
+
+            } catch (error) {
+                console.error("Error processing PDF or calling Vision API:", error);
+                addMessage("Sorry, I couldn't analyze that PDF. Please try another file.", 'ai');
+            } finally {
+                showLoading(false);
+                pdfUpload.value = ''; // Reset file input
+            }
+        }
+        
+        const toBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+
+        function showLoading(isLoading) {
+             loadingSpinner.classList.toggle('hidden', !isLoading);
+             sendBtn.disabled = isLoading;
+             uploadBtn.disabled = isLoading;
+             pdfUploadBtn.disabled = isLoading;
+             // Also disable quick action buttons during loading
+             document.querySelectorAll('.quick-action-btn').forEach(btn => {
+                 btn.disabled = isLoading;
+             });
+        }
+
+        async function callGeminiVisionAPI(prompt, base64FileData) {
+            const mimeType = base64FileData.substring(base64FileData.indexOf(":") + 1, base64FileData.indexOf(";"));
+            const pureBase64 = base64FileData.substring(base64FileData.indexOf(",") + 1);
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
+            const payload = {
+                contents: [{
+                    parts: [
+                        { text: prompt },
+                        { inlineData: { mimeType: mimeType, data: pureBase64 } }
+                    ]
+                }]
+            };
+            
+            await makeApiCall(apiUrl, payload);
+        }
+
+        async function callGeminiAPI(userMessage) {
+            const systemPrompt = `
+                You are "Pawsitive AI," a friendly and expert AI assistant for pet owners. 
+                Your goal is to provide helpful, safe, and concise advice.
+
+                RULES:
+                1.Always prioritize the pet's safety and well-being. If a question is about a serious medical issue, your FIRST sentence MUST be: "I'm not a veterinarian, and for any serious health concerns, you should always consult a licensed vet."
+                2.Use Markdown for formatting to ensure the output is clean and readable. Use line breaks to separate paragraphs.
+                3.Product Recommendations:
+                  a.Before recommending, first identify the specific pet species (e.g., dog, cat, puppy, kitten) from the user's query.
+                  b.When recommending 1 to 3 products, one of them MUST be available on Chewy.com.
+                  c.Instead of a direct URL to a specific product, you MUST provide a search link for that product on Chewy.com.
+                  d.The search link MUST be formatted exactly as: https://www.chewy.com/s?query=KEYWORDS.
+                  e.The KEYWORDS should include the pet species and the product name, with spaces replaced by %20.
+                  f.CRITICAL: The final URL must begin exactly with https://www.chewy.com. Do not wrap it in any other URL (like a Google search link).
+                  g.FORMATTING: You MUST use clean anchor text for the link. The visible text should be "Search for it on Chewy.com". For example: [Search for it on Chewy.com](URL_goes_here).
+                4.Format product names by surrounding them with double asterisks. For example: Purina Pro Plan Adult Shredded Blend.
+                5.Format the list of products as a numbered list (1., 2., 3.).
+                6.Do not invent fake product names. If you don't know a real product, just describe the type of product needed.
+                7.Proactive Follow-up: After providing the main answer, you MUST add a concise and helpful follow-up question.
+                  a.This question MUST be a logical next step that is directly related to the user's original query.
+                  b.Vary the question based on the context. The goal is to anticipate what the user might need to know next.
+                  You should offer one or two potential topics for the user to explore next.
+                  c.Formatting:
+                    Start the follow-up on a new line with the special token [FOLLOWUP].
+                    If you offer two topics, present them as two separate, complete sentences or questions. Do not combine them with "or".
+                  d.Examples of good follow-ups:
+                    If the query was about food, ask about feeding schedules or portion sizes.
+                    If the query was about a durable toy, ask about ways to keep a power-chewing dog engaged and safe.
+                    If the query was about litter box problems, ask about choosing the right type of cat litter.
+                  d.Example of correct formatting for a cat food query:
+                  [FOLLOWUP]
+                  Would you like some tips on determining the right portion size for your cat? I can also provide advice on creating a consistent feeding schedule.
+                8.  Maintain a friendly, encouraging, and positive tone.
+            `;
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
+            const payload = {
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                contents: [{ parts: [{ text: userMessage }] }]
+            };
+            
+            await makeApiCall(apiUrl, payload);
+        }
+        
+
+        // This is the new, upgraded version
+        async function makeApiCall(apiUrl, payload) {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+        if (!response.ok) {
+            throw new Error(`API request failed with status ${response.status}`);
+        }
+
+        const result = await response.json();
+        const candidate = result.candidates?.[0];
+
+        if (candidate && candidate.content?.parts?.[0]?.text) {
+        const fullMessage = candidate.content.parts[0].text;
+        // Change #1: Define the separator we are looking for
+        const separator = '[FOLLOWUP]';
+
+        // Change #2: Check if the AI's response contains our separator
+        if (fullMessage.includes(separator)) {
+            const parts = fullMessage.split(separator);
+            const mainAnswer = parts[0].trim();
+            const followUp = parts[1].trim();
+
+            // Change #3: Add the first part of the message immediately
+            addMessage(mainAnswer, 'ai');
+
+            // Change #4: Use a timer to add the second part after a delay
+            if (followUp) {
+                setTimeout(() => {
+                    addMessage(followUp, 'ai');
+                }, 1700); // 1.7-second delay
+            }
+        } else {
+            // If no separator, behave like the original code
+            addMessage(fullMessage, 'ai');
+        }
+        } else {
+         addMessage("I'm sorry, I couldn't generate a response...", 'ai');
+        }
+    }
+
+
+           
+    </script>
+</body>
+</html>
+
