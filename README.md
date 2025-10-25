@@ -53,4 +53,37 @@ One-click access to common pet care functions
 
 
 ## 🛠️ Tech Stack
-CategoryTechnologyAI EngineClaude AI, LangChain, LangGraphFrontendReact.js, JavaScript, HTML, CSSVision APIClaude Vision API (image analysis)TestingTestSpriteVersion ControlGitDeploymentNetlify
+<table>
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>Technology</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>AI Engine</strong></td>
+      <td>Claude AI, LangChain, LangGraph</td>
+    </tr>
+    <tr>
+      <td><strong>Frontend</strong></td>
+      <td>React.js, JavaScript, HTML, CSS</td>
+    </tr>
+    <tr>
+      <td><strong>Vision API</strong></td>
+      <td>Claude Vision API (image analysis)</td>
+    </tr>
+    <tr>
+      <td><strong>Testing</strong></td>
+      <td>TestSprite</td>
+    </tr>
+    <tr>
+      <td><strong>Version Control</strong></td>
+      <td>Git</td>
+    </tr>
+    <tr>
+      <td><strong>Deployment</strong></td>
+      <td>Netlify</td>
+    </tr>
+  </tbody>
+</table>
